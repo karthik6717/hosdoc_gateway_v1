@@ -52,7 +52,7 @@ eureka:
     lease-expiration-duration-in-seconds: 30
     
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 # Health check configuration
 management:

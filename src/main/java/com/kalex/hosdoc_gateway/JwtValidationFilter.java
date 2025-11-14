@@ -21,7 +21,12 @@ public class JwtValidationFilter extends AbstractGatewayFilterFactory<JwtValidat
     public JwtValidationFilter(WebClient.Builder webClientBuilder) {
         super(Config.class);
         // Configure to call hosdoc_auth service for JWT validation
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8081/api/auth").build();
+        // Use environment variable or default to localhost for local development
+        String authServiceUrl = System.getenv("AUTH_SERVICE_URL");
+        if (authServiceUrl == null || authServiceUrl.isEmpty()) {
+            authServiceUrl = "http://localhost:8081";
+        }
+        this.webClient = webClientBuilder.baseUrl(authServiceUrl + "/api/auth").build();
     }
 
     @Override
