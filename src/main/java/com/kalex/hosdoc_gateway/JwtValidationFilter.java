@@ -65,7 +65,10 @@ public class JwtValidationFilter extends AbstractGatewayFilterFactory<JwtValidat
                 "/api/auth/login",
                 "/api/auth/register",
                 "/api/v1/specialties",
-                "/api/v1/doctors"
+                "/api/v1/doctors",
+                "/swagger-ui",
+                "/v3/api-docs",
+                "/swagger-resources"
         );
         return exclude.stream().anyMatch(path::startsWith);
     }
