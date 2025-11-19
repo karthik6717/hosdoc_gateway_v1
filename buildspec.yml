@@ -1,0 +1,33 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "PRE-BUILD START"
+      - aws --version
+      - REGISTRY=$(echo $REPOSITORY_URI | awk -F'/' '{print $1}')
+      - echo "Registry host: $REGISTRY"
+      - aws ecr describe-repositories --repository-names $IMAGE_REPO_NAME --region $AWS_REGION || aws ecr create-repository --repository-name $IMAGE_REPO_NAME --region $AWS_REGION
+      - echo "Logging into ECR"
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REGISTRY
+      - if [ -n "$CODEBUILD_RESOLVED_SOURCE_VERSION" ]; then IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7); else IMAGE_TAG=build-${CODEBUILD_BUILD_ID#*:}; fi
+      - echo "IMAGE_TAG=$IMAGE_TAG"
+
+  build:
+    commands:
+      - echo "BUILD START"
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo "POST-BUILD START"
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - printf '[{\"name\":\"%s\",\"imageUri\":\"%s\"}]' "$IMAGE_REPO_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imageDetail.json
+      - echo "imageDetail.json:"
+      - cat imageDetail.json
+
+artifacts:
+  files:
+    - imageDetail.json
