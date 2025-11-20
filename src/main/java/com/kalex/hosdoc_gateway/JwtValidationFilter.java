@@ -94,6 +94,7 @@ public class JwtValidationFilter extends AbstractGatewayFilterFactory<JwtValidat
 
     public static class Config {
         // Configuration properties can be added here if needed
+        //comment add to test image file
     }
 }
 
